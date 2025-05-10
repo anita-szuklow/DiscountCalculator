@@ -58,16 +58,16 @@ public class DiscountCalculatorApplication {
         Combination finalCombination = new Combination();
         
         System.out.println("/nPo swiezym zaladowaniu:/n");
-        orders.forEach(System.out::println);
-        paymentMethods.forEach(System.out::println);
+        finalResetter.orders.forEach(System.out::println);
+        finalResetter.paymentMethods.forEach(System.out::println);
         System.out.println("Suma rabatow master: " + masterCombination.totalDiscount.toString());
         System.out.println("Suma rabatow final: " + finalCombination.totalDiscount.toString());
         
         bestStrategy.apply(finalResetter.orders, finalResetter.paymentMethods, finalCombination);
         
         System.out.println("/nPo oplaceniu rabatow:/n");
-        orders.forEach(System.out::println);
-        paymentMethods.forEach(System.out::println);
+        finalResetter.orders.forEach(System.out::println);
+        finalResetter.paymentMethods.forEach(System.out::println);
         System.out.println("Suma rabatow master: " + masterCombination.totalDiscount.toString());
         System.out.println("Suma rabatow final: " + finalCombination.totalDiscount.toString());       
         
@@ -92,8 +92,8 @@ public class DiscountCalculatorApplication {
         }
         
         System.out.println("/nPo oplaceniu wszystkiego:/n");
-        orders.forEach(System.out::println);
-        paymentMethods.forEach(System.out::println);
+        finalResetter.orders.forEach(System.out::println);
+        finalResetter.paymentMethods.forEach(System.out::println);
         System.out.println("Suma rabatow master: " + masterCombination.totalDiscount.toString());
         System.out.println("Suma rabatow final: " + finalCombination.totalDiscount.toString());
         
