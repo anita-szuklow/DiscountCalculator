@@ -11,7 +11,7 @@ import java.util.List;
 public class StrategyPointsFirstOrdersAscendingMethodsDescending implements Strategy {
     @Override
     public String getName(){
-        return "Sortowanie malejaca zamowien i metod, punkty calosciowe przed kartami";
+        return "Sortowanie rosnace zamowien i malejace metod, punkty calosciowe przed kartami";
     }
     
     @Override

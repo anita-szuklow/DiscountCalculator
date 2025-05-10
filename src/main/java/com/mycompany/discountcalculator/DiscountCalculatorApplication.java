@@ -27,23 +27,9 @@ public class DiscountCalculatorApplication {
         DataResetter resetter1 = resetData(ordersPath, methodsPath);
         List<Order> orders = resetter1.orders;
         List<PaymentMethod> paymentMethods = resetter1.paymentMethods;
-        
-//        ObjectMapper myMapper = new ObjectMapper();
-        
-//        List<Order> unsortedOrders = myMapper.readValue(ordersFile, new TypeReference<>(){});
-//        List<PaymentMethod> unsortedPaymentMethods = myMapper.readValue(paymentMethodsFile, new TypeReference<>(){});
-        
-//        List<Order> orders = new ArrayList<>(unsortedOrders);
-        orders.sort(Comparator.comparing(Order::getValue).reversed());
-//        
-//        List<Order> ascendingOrders = new ArrayList<>(orders);
-//        ascendingOrders.reversed();
-//
-//        List<PaymentMethod> paymentMethods = new ArrayList<>(unsortedPaymentMethods);
-        paymentMethods.sort(Comparator.comparing(PaymentMethod::getDiscount).reversed());
-        
+
         Combination masterCombination = new Combination();
-        Combination tryCombination = new Combination();
+        Strategy bestStrategy = null;
         
         orders.forEach(System.out::println);
         paymentMethods.forEach(System.out::println);
@@ -55,152 +41,49 @@ public class DiscountCalculatorApplication {
         );
         
         for (Strategy strategy : strategies){
-            DataResetter setter4 = resetData(ordersPath, methodsPath);
+            DataResetter setter2 = resetData(ordersPath, methodsPath);
             
-            Combination tryCombination1 = new Combination();
-            strategy.apply(setter4.orders, setter4.paymentMethods, tryCombination1);
+            Combination tryCombination = new Combination();
+            strategy.apply(setter2.orders, setter2.paymentMethods, tryCombination);
             
-            System.out.println("Strategia: " + strategy.getName() + "rabat calkowity: " + tryCombination1.totalDiscount);
+            System.out.println("Strategia: " + strategy.getName() + "rabat calkowity: " + tryCombination.totalDiscount);
             
             if (tryCombination.totalDiscount.compareTo(masterCombination.totalDiscount) > 0) {
-            masterCombination = tryCombination1;
-            
-    }
-            
+                masterCombination = tryCombination;
+                bestStrategy = strategy;
+            }            
         }
+        //uruchamiam ponownie najlepsza strategie, aby oplacic wszystkie kwoty zamowien z rabatami
+        DataResetter finalResetter = resetData(ordersPath, methodsPath);
+        Combination finalCombination = new Combination();
         
-        for(Order order : orders){
-            for(PaymentMethod paymentMethod : paymentMethods){
-                 //sprawdzam, czy punkty moga w calosci oplacic kolejne zamowienia
-                if(checkForPointsFullValue(order, paymentMethod, tryCombination)) break;
-            }
-            for(PaymentMethod paymentMethod : paymentMethods){
-                // sprawdzam pozostale metody oplacania zamowien
-                if(checkForCards(order, paymentMethod, tryCombination)) continue;
-            }
-            for(PaymentMethod paymentMethod : paymentMethods){
-                // jesli nie da sie oplacic w calosci z rabatem to sprawdzic czy da sie oplacic punktami
-                if(checkForPointsPartialValue(order, paymentMethod, tryCombination)) break;
-            }            
-                //sprawdzam czy ta kombinacja rabatow jest lepsze od poprzedniej i jesli tak - zapisuje bieżące dane
-                if(tryCombination.totalDiscount.compareTo(masterCombination.totalDiscount) > 0){
-                    masterCombination.totalDiscount = tryCombination.totalDiscount;
-                    masterCombination.finalPayments = tryCombination.finalPayments;         
-            }
-        }
+        System.out.println("/nPo swiezym zaladowaniu:/n");
+        orders.forEach(System.out::println);
+        paymentMethods.forEach(System.out::println);
+        System.out.println("Suma rabatow master: " + masterCombination.totalDiscount.toString());
+        System.out.println("Suma rabatow final: " + finalCombination.totalDiscount.toString());
         
-                    System.out.println("/nPo przejsciu petli pierwszej:/n");
-                    orders.forEach(System.out::println);
-                    paymentMethods.forEach(System.out::println);
-                    System.out.println("Suma rabatow: " + tryCombination.totalDiscount.toString());
+        bestStrategy.apply(finalResetter.orders, finalResetter.paymentMethods, finalCombination);
         
-        // sprawdzam, czy oplacenie najpierw kartami, a potem punktami da lepszy efekt, jesli bedzie taki sam, poprzednie
-        // ustawienie premiujace punkty nie zostanie nadpisane
-        tryCombination.totalDiscount = BigInteger.ZERO;
-
-        DataResetter resetter2 = resetData(ordersPath, methodsPath);
-        orders = resetter2.orders;
-        paymentMethods = resetter2.paymentMethods;
-//        unsortedOrders = myMapper.readValue(ordersFile, new TypeReference<>(){});
-//        unsortedPaymentMethods = myMapper.readValue(paymentMethodsFile, new TypeReference<>(){});
-//        
-//        orders = new ArrayList<>(unsortedOrders);
-        orders.sort(Comparator.comparing(Order::getValue).reversed());
-//        
-//        ascendingOrders = new ArrayList<>(unsortedOrders);
-//        ascendingOrders.sort(Comparator.comparing(Order::getValue));
-//
-//        paymentMethods = new ArrayList<>(unsortedPaymentMethods);
-        paymentMethods.sort(Comparator.comparing(PaymentMethod::getDiscount).reversed());
-//        
-//        paymentMethods = unsortedPaymentMethods;
-//        paymentMethods.sort(Comparator.comparing(PaymentMethod::getDiscount).reversed());
+        System.out.println("/nPo oplaceniu rabatow:/n");
+        orders.forEach(System.out::println);
+        paymentMethods.forEach(System.out::println);
+        System.out.println("Suma rabatow master: " + masterCombination.totalDiscount.toString());
+        System.out.println("Suma rabatow final: " + finalCombination.totalDiscount.toString());       
         
-        System.out.println("/nPrzed druga petla:/n");
-                    orders.forEach(System.out::println);
-                    paymentMethods.forEach(System.out::println);
-                    System.out.println("Suma rabatow: " + tryCombination.totalDiscount.toString());
-        
-        for(Order order : orders){
-            for(PaymentMethod paymentMethod : paymentMethods){
-                if(checkForCards(order, paymentMethod, tryCombination)) continue;
-            }
-            for(PaymentMethod paymentMethod : paymentMethods){
-                if(checkForPointsFullValue(order, paymentMethod, tryCombination)) break;
-            }
-            for(PaymentMethod paymentMethod : paymentMethods){
-                // jesli nie da sie oplacic w calosci z rabatem to sprawdzic czy da sie oplacic punktami
-                if(checkForPointsPartialValue(order, paymentMethod, tryCombination)) break;
-            }            
-                //sprawdzam czy ta kombinacja rabatow jest lepsze od poprzedniej i jesli tak - zapisuje bieżące dane
-                if(tryCombination.totalDiscount.compareTo(masterCombination.totalDiscount) > 0){
-                    masterCombination.totalDiscount = tryCombination.totalDiscount;
-                    masterCombination.finalPayments = tryCombination.finalPayments;
-            }
-        }        
-                    System.out.println("/nPo przejsciu petli drugiej:/n");
-                        orders.forEach(System.out::println);
-                        paymentMethods.forEach(System.out::println);
-                        System.out.println("Suma rabatow: " + tryCombination.totalDiscount.toString());
-        
-        // sprawdzam, czy oplacenie najpierw tańszych, a potem droższych zamówień dla lepszy wynik, jesli bedzie taki sam, poprzednie
-        // ustawienie nie zostanie nadpisane
-        tryCombination.totalDiscount = BigInteger.ZERO;
-        
-        DataResetter resetter3 = resetData(ordersPath, methodsPath);
-        orders = resetter3.orders;
-        paymentMethods = resetter3.paymentMethods;
-
-//        unsortedOrders = myMapper.readValue(ordersFile, new TypeReference<>(){});
-//        unsortedPaymentMethods = myMapper.readValue(paymentMethodsFile, new TypeReference<>(){});
-//        
-//        orders = new ArrayList<>(unsortedOrders);
-        orders.sort(Comparator.comparing(Order::getValue));
-//        
-//        ascendingOrders = new ArrayList<>(orders);
-//        ascendingOrders.sort(Comparator.comparing(Order::getValue));
-//
-//        paymentMethods = new ArrayList<>(unsortedPaymentMethods);
-//        paymentMethods.sort(Comparator.comparing(PaymentMethod::getDiscount).reversed());
-//        
-//        paymentMethods = unsortedPaymentMethods;
-        paymentMethods.sort(Comparator.comparing(PaymentMethod::getDiscount).reversed());
-        for(Order order : orders){           
-            for(PaymentMethod paymentMethod : paymentMethods){
-                if(checkForCards(order, paymentMethod, tryCombination)) continue; //
-            }
-            for(PaymentMethod paymentMethod : paymentMethods){
-                if(checkForPointsFullValue(order, paymentMethod, tryCombination)) break;
-            }
-            for(PaymentMethod paymentMethod : paymentMethods){
-                // jesli nie da sie oplacic w calosci z rabatem to sprawdzic czy da sie oplacic punktami, ale tutaj trzeba dac najwyzsze zamowienie, jakie sie kwalifikuje!!!
-                if(checkForPointsPartialValue(order, paymentMethod, tryCombination)) break;
-            }            
-                //sprawdzam czy ta kombinacja rabatow jest lepsze od poprzedniej i jesli tak - zapisuje bieżące dane
-                if(tryCombination.totalDiscount.compareTo(masterCombination.totalDiscount) > 0){
-                    masterCombination.totalDiscount = tryCombination.totalDiscount;
-                    masterCombination.finalPayments = tryCombination.finalPayments;
-            }
-        }        
-                    System.out.println("/nPo przejsciu petli trzeciej:/n");
-                        orders.forEach(System.out::println);
-                        paymentMethods.forEach(System.out::println);
-                        System.out.println("Suma rabatow: " + tryCombination.totalDiscount.toString());
-        
-        
-        // dodać pętle w innych kolejnosciach
-
         //oplacenie pozostalych niezrabatowanych kwot zamowien
-        for(Order order : orders){
-            for(PaymentMethod paymentMethod : paymentMethods){
+        for(Order order : finalResetter.orders){
+            for(PaymentMethod paymentMethod : finalResetter.paymentMethods){
             if(!order.value.equals(BigInteger.ZERO)){
                     if(paymentMethod.limit.compareTo(order.value) > 0){
                         paymentMethod.limit = paymentMethod.limit.subtract(order.value);
+                        finalCombination.addPaymentToMethod(paymentMethod.id, order.value);
                         order.value = BigInteger.ZERO;
                         break;
                     }
                     if(paymentMethod.limit.compareTo(order.value) < 0){
                         order.value.subtract(paymentMethod.limit);
+                        finalCombination.addPaymentToMethod(paymentMethod.id, paymentMethod.limit);
                         paymentMethod.limit = BigInteger.ZERO;
                         continue;
                     }
@@ -211,9 +94,10 @@ public class DiscountCalculatorApplication {
         System.out.println("/nPo oplaceniu wszystkiego:/n");
         orders.forEach(System.out::println);
         paymentMethods.forEach(System.out::println);
-        System.out.println("Suma rabatow: " + masterCombination.totalDiscount.toString());
+        System.out.println("Suma rabatow master: " + masterCombination.totalDiscount.toString());
+        System.out.println("Suma rabatow final: " + finalCombination.totalDiscount.toString());
         
-        masterCombination.finalResult();
+        finalCombination.finalResult();
         }
         catch(IOException exception){
             System.err.println(exception.getMessage());
