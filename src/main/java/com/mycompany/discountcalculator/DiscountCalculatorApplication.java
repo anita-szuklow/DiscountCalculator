@@ -2,6 +2,7 @@ package com.mycompany.discountcalculator;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mycompany.discountcalculator.strategies.*;
 import java.io.*;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -47,6 +48,26 @@ public class DiscountCalculatorApplication {
         orders.forEach(System.out::println);
         paymentMethods.forEach(System.out::println);
         
+        List<Strategy> strategies = Arrays.asList(
+                new StrategyCardsFirstOrdersDescendingMethodsDescending(),
+                new StrategyPointsFirstOrdersAscendingMethodsDescending(),
+                new StrategyPointsFirstOrdersDescendingMethodsDescending()
+        );
+        
+        for (Strategy strategy : strategies){
+            DataResetter setter4 = resetData(ordersPath, methodsPath);
+            
+            Combination tryCombination1 = new Combination();
+            strategy.apply(setter4.orders, setter4.paymentMethods, tryCombination1);
+            
+            System.out.println("Strategia: " + strategy.getName() + "rabat calkowity: " + tryCombination1.totalDiscount);
+            
+            if (tryCombination.totalDiscount.compareTo(masterCombination.totalDiscount) > 0) {
+            masterCombination = tryCombination1;
+            
+    }
+            
+        }
         
         for(Order order : orders){
             for(PaymentMethod paymentMethod : paymentMethods){
@@ -64,7 +85,7 @@ public class DiscountCalculatorApplication {
                 //sprawdzam czy ta kombinacja rabatow jest lepsze od poprzedniej i jesli tak - zapisuje bieżące dane
                 if(tryCombination.totalDiscount.compareTo(masterCombination.totalDiscount) > 0){
                     masterCombination.totalDiscount = tryCombination.totalDiscount;
-                             
+                    masterCombination.finalPayments = tryCombination.finalPayments;         
             }
         }
         
@@ -114,6 +135,7 @@ public class DiscountCalculatorApplication {
                 //sprawdzam czy ta kombinacja rabatow jest lepsze od poprzedniej i jesli tak - zapisuje bieżące dane
                 if(tryCombination.totalDiscount.compareTo(masterCombination.totalDiscount) > 0){
                     masterCombination.totalDiscount = tryCombination.totalDiscount;
+                    masterCombination.finalPayments = tryCombination.finalPayments;
             }
         }        
                     System.out.println("/nPo przejsciu petli drugiej:/n");
@@ -156,7 +178,8 @@ public class DiscountCalculatorApplication {
             }            
                 //sprawdzam czy ta kombinacja rabatow jest lepsze od poprzedniej i jesli tak - zapisuje bieżące dane
                 if(tryCombination.totalDiscount.compareTo(masterCombination.totalDiscount) > 0){
-                    masterCombination.totalDiscount = tryCombination.totalDiscount;                          
+                    masterCombination.totalDiscount = tryCombination.totalDiscount;
+                    masterCombination.finalPayments = tryCombination.finalPayments;
             }
         }        
                     System.out.println("/nPo przejsciu petli trzeciej:/n");
@@ -190,6 +213,7 @@ public class DiscountCalculatorApplication {
         paymentMethods.forEach(System.out::println);
         System.out.println("Suma rabatow: " + masterCombination.totalDiscount.toString());
         
+        masterCombination.finalResult();
         }
         catch(IOException exception){
             System.err.println(exception.getMessage());

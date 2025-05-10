@@ -1,5 +1,6 @@
 package com.mycompany.discountcalculator;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
@@ -28,8 +29,11 @@ public class Combination {
     }
     }    
     public void finalResult() {
-    for (Map.Entry<String, BigInteger> entry : finalPayments.entrySet()) {
-        System.out.println(entry.getKey() + " " + entry.getValue()+"/n");
+    for (Map.Entry<String, BigInteger> entry : finalPayments.entrySet()){
+        BigDecimal divided = new BigDecimal(entry.getValue())
+        .divide(BigDecimal.valueOf(100));
+
+        System.out.println(entry.getKey() + " " + divided);
     }
 }
 }
