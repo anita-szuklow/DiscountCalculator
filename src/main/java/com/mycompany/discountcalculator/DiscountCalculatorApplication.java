@@ -5,9 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mycompany.discountcalculator.strategies.*;
 import java.io.*;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.*;
 import java.util.List;
 
 public class DiscountCalculatorApplication {
@@ -34,10 +32,17 @@ public class DiscountCalculatorApplication {
         orders.forEach(System.out::println);
         paymentMethods.forEach(System.out::println);
         
-        List<Strategy> strategies = Arrays.asList(
+        List<Strategy> strategies = Arrays.asList(  
+                new StrategyBestDiscountEfficiency(),
+                new StrategyBiggestDiscountValue(),
+                new StrategyPointsFirstOrdersAscendingMethodsDescending(),                
+                new StrategyPointsFirstOrdersDescendingMethodsDescending(),
+                new StrategyPointsFirstOrdersAscendingByMethodsAllowed(),
+                new StrategyPointsFirstOrdersAscendingByMethodsAllowValuesDescending(),
                 new StrategyCardsFirstOrdersDescendingMethodsDescending(),
-                new StrategyPointsFirstOrdersAscendingMethodsDescending(),
-                new StrategyPointsFirstOrdersDescendingMethodsDescending()
+                new StrategyCardsFirstOrdersDescendingByMethodsAllowedValDes(),
+                new StrategyDiscountMethodsRatio()
+ 
         );
         
         for (Strategy strategy : strategies){
@@ -143,10 +148,11 @@ public class DiscountCalculatorApplication {
                         && !order.value.equals(BigInteger.ZERO)){
                     BigInteger discount1 = order.value.divide(BigInteger.valueOf(10));                    
                     tryCombination.totalDiscount = tryCombination.totalDiscount.add(discount1);
-                    tryCombination.addPaymentToMethod(paymentMethod.id, paymentMethod.limit);
+                    BigInteger dueAmount = order.value.divide(BigInteger.valueOf(10));
+                    tryCombination.addPaymentToMethod(paymentMethod.id, dueAmount);
                     order.value = order.value.subtract(discount1);
-                    order.value = order.value.subtract(paymentMethod.limit);
-                    paymentMethod.limit = BigInteger.ZERO;                    
+                    order.value = order.value.subtract(dueAmount);
+                    paymentMethod.limit = paymentMethod.limit.subtract(dueAmount);                    
                 }
         return true;
     }
@@ -156,8 +162,5 @@ public class DiscountCalculatorApplication {
     List<Order> orders = mapper.readValue(new File(ordersPath), new TypeReference<>() {});
     List<PaymentMethod> methods = mapper.readValue(new File(methodsPath), new TypeReference<>() {});
     return new DataResetter(orders, methods);
-}
-        
-    
-    
+    }  
 }

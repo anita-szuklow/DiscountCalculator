@@ -26,7 +26,7 @@ public class StrategyPointsFirstOrdersDescendingMethodsDescending implements Str
                 if (DiscountCalculatorApplication.checkForCards(order, method, strategyResult)) continue;
             }
             for (PaymentMethod method : paymentMethods) {
-                if (DiscountCalculatorApplication.checkForPointsPartialValue(order, method, strategyResult)) break;
+                if (DiscountCalculatorApplication.checkForPointsPartialValue(order, method, strategyResult)) continue;
             }
         }
     }

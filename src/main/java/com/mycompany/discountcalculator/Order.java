@@ -2,10 +2,7 @@ package com.mycompany.discountcalculator;
 
 import java.math.BigDecimal;
 import java.util.List;
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.Nulls;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
