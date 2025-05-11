@@ -28,19 +28,16 @@ public class DiscountCalculatorApplication {
 
         Combination masterCombination = new Combination();
         Strategy bestStrategy = null;
-        
-        orders.forEach(System.out::println);
-        paymentMethods.forEach(System.out::println);
-        
-        List<Strategy> strategies = Arrays.asList(  
-                new StrategyBestDiscountEfficiency(),
-                new StrategyBiggestDiscountValue(),
-                new StrategyPointsFirstOrdersAscendingMethodsDescending(),                
+   
+        List<Strategy> strategies = Arrays.asList( 
+                new StrategyPointsFirstOrdersAscendingMethodsDescending(),
                 new StrategyPointsFirstOrdersDescendingMethodsDescending(),
-                new StrategyPointsFirstOrdersAscendingByMethodsAllowed(),
-                new StrategyPointsFirstOrdersAscendingByMethodsAllowValuesDescending(),
+//                new StrategyPointsFirstOrdersAscendingByMethodsAllowed(),
+//                new StrategyPointsFirstOrdersAscendingByMethodsAllowValuesDescending(),                 
                 new StrategyCardsFirstOrdersDescendingMethodsDescending(),
-                new StrategyCardsFirstOrdersDescendingByMethodsAllowedValDes(),
+//                new StrategyCardsFirstOrdersDescendingByMethodsAllowedValDes(),
+                new StrategyBestDiscountEfficiency(),
+//                new StrategyBiggestDiscountValue(),
                 new StrategyDiscountMethodsRatio()
  
         );
@@ -49,33 +46,20 @@ public class DiscountCalculatorApplication {
             DataResetter setter2 = resetData(ordersPath, methodsPath);
             
             Combination tryCombination = new Combination();
-            strategy.apply(setter2.orders, setter2.paymentMethods, tryCombination);
-            
-            System.out.println("Strategia: " + strategy.getName() + "rabat calkowity: " + tryCombination.totalDiscount);
+            strategy.apply(setter2.orders, setter2.paymentMethods, tryCombination);            
             
             if (tryCombination.totalDiscount.compareTo(masterCombination.totalDiscount) > 0) {
                 masterCombination = tryCombination;
                 bestStrategy = strategy;
             }            
-        }
+        }        
+        
         //uruchamiam ponownie najlepsza strategie, aby oplacic wszystkie kwoty zamowien z rabatami
         DataResetter finalResetter = resetData(ordersPath, methodsPath);
         Combination finalCombination = new Combination();
         
-        System.out.println("/nPo swiezym zaladowaniu:/n");
-        finalResetter.orders.forEach(System.out::println);
-        finalResetter.paymentMethods.forEach(System.out::println);
-        System.out.println("Suma rabatow master: " + masterCombination.totalDiscount.toString());
-        System.out.println("Suma rabatow final: " + finalCombination.totalDiscount.toString());
-        
         bestStrategy.apply(finalResetter.orders, finalResetter.paymentMethods, finalCombination);
-        
-        System.out.println("/nPo oplaceniu rabatow:/n");
-        finalResetter.orders.forEach(System.out::println);
-        finalResetter.paymentMethods.forEach(System.out::println);
-        System.out.println("Suma rabatow master: " + masterCombination.totalDiscount.toString());
-        System.out.println("Suma rabatow final: " + finalCombination.totalDiscount.toString());       
-        
+
         //oplacenie pozostalych niezrabatowanych kwot zamowien
         for(Order order : finalResetter.orders){
             for(PaymentMethod paymentMethod : finalResetter.paymentMethods){
@@ -87,7 +71,7 @@ public class DiscountCalculatorApplication {
                         break;
                     }
                     if(paymentMethod.limit.compareTo(order.value) < 0){
-                        order.value.subtract(paymentMethod.limit);
+                        order.value = order.value.subtract(paymentMethod.limit);
                         finalCombination.addPaymentToMethod(paymentMethod.id, paymentMethod.limit);
                         paymentMethod.limit = BigInteger.ZERO;
                         continue;
@@ -95,12 +79,6 @@ public class DiscountCalculatorApplication {
                 }
             }
         }
-        
-        System.out.println("/nPo oplaceniu wszystkiego:/n");
-        finalResetter.orders.forEach(System.out::println);
-        finalResetter.paymentMethods.forEach(System.out::println);
-        System.out.println("Suma rabatow master: " + masterCombination.totalDiscount.toString());
-        System.out.println("Suma rabatow final: " + finalCombination.totalDiscount.toString());
         
         finalCombination.finalResult();
         }
@@ -126,6 +104,7 @@ public class DiscountCalculatorApplication {
     
     public static boolean checkForCards(Order order, PaymentMethod paymentMethod, Combination tryCombination){
         if (paymentMethod.id.equals("PUNKTY")) return false;
+        if (order.value.compareTo(paymentMethod.limit) > 0 || order.value.equals(BigInteger.ZERO)) return false;
         if (order.promotions.contains(paymentMethod.id) 
                         && (order.value.compareTo(paymentMethod.limit) <= 0) && !order.value.equals(BigInteger.ZERO)){
                     BigInteger discount1 = order.value.multiply(BigInteger.valueOf(paymentMethod.discount)).divide(BigInteger.valueOf(100));           
@@ -137,7 +116,7 @@ public class DiscountCalculatorApplication {
                 }
                 return true;
     }
-    
+    // zrezygnowalam z tej metody na rzecz kolejnej z dopiskiem Alt
     public static boolean checkForPointsPartialValue(Order order, PaymentMethod paymentMethod, Combination tryCombination){
         if (!paymentMethod.id.equals("PUNKTY")
                         || (order.value.divide(BigInteger.valueOf(10)).compareTo(paymentMethod.limit)>=0)
@@ -146,13 +125,30 @@ public class DiscountCalculatorApplication {
         if (paymentMethod.id.equals("PUNKTY") && (order.value.compareTo(paymentMethod.limit) > 0)
                         && (order.value.divide(BigInteger.valueOf(10)).compareTo(paymentMethod.limit)<=0)
                         && !order.value.equals(BigInteger.ZERO)){
-                    BigInteger discount1 = order.value.divide(BigInteger.valueOf(10));                    
-                    tryCombination.totalDiscount = tryCombination.totalDiscount.add(discount1);
-                    BigInteger dueAmount = order.value.divide(BigInteger.valueOf(10));
-                    tryCombination.addPaymentToMethod(paymentMethod.id, dueAmount);
-                    order.value = order.value.subtract(discount1);
-                    order.value = order.value.subtract(dueAmount);
-                    paymentMethod.limit = paymentMethod.limit.subtract(dueAmount);                    
+                    BigInteger discount = order.value.divide(BigInteger.valueOf(10));                    
+                    tryCombination.totalDiscount = tryCombination.totalDiscount.add(discount);
+                    tryCombination.addPaymentToMethod(paymentMethod.id, paymentMethod.limit);
+                    order.value = order.value.subtract(discount);
+                    order.value = order.value.subtract(paymentMethod.limit);
+                    paymentMethod.limit = BigInteger.ZERO;       
+                }
+        return true;
+    }
+    public static boolean checkForPointsPartialValueAlt(Order order, PaymentMethod paymentMethod, Combination tryCombination){
+        if (!paymentMethod.id.equals("PUNKTY")
+                        || (order.value.divide(BigInteger.valueOf(10)).compareTo(paymentMethod.limit)>=0)
+                        || order.value.equals(BigInteger.ZERO))
+            return false;
+        if (paymentMethod.id.equals("PUNKTY") && (order.value.compareTo(paymentMethod.limit) > 0)
+                        && (order.value.divide(BigInteger.valueOf(10)).compareTo(paymentMethod.limit)<=0)
+                        && !order.value.equals(BigInteger.ZERO)){
+                    BigInteger discount = order.value.divide(BigInteger.valueOf(10));                    
+                    order.value = order.value.subtract(discount);                    
+                    tryCombination.totalDiscount = tryCombination.totalDiscount.add(discount);                    
+                    //oplacam tylko 10% i szukam, czy mozna jeszcze na innym zamowieniu wykorzystac rabat za 10%
+                    order.value = order.value.subtract(discount);
+                    paymentMethod.limit = paymentMethod.limit.subtract(discount);
+                    tryCombination.addPaymentToMethod(paymentMethod.id, discount);
                 }
         return true;
     }

@@ -42,7 +42,7 @@ public class StrategyPointsFirstOrdersAscendingByMethodsAllowValuesDescending im
             }
             
             for (PaymentMethod method : paymentMethods) {
-                if (DiscountCalculatorApplication.checkForPointsPartialValue(order, method, strategyResult)) continue;
+                if (DiscountCalculatorApplication.checkForPointsPartialValue(order, method, strategyResult)) break;
             }
         }
     }

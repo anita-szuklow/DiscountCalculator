@@ -23,15 +23,21 @@ public class StrategyPointsFirstOrdersAscendingMethodsDescending implements Stra
 
         for (Order order : orders) {
             for (PaymentMethod method : paymentMethods) {
-                if (DiscountCalculatorApplication.checkForPointsFullValue(order, method, strategyResult)) break;
+                if (DiscountCalculatorApplication.checkForPointsFullValue(order, method, strategyResult)){
+                    break;
+                }
             }
             
             for (PaymentMethod method : paymentMethods) {
-                if (DiscountCalculatorApplication.checkForCards(order, method, strategyResult)) continue;
+                if (DiscountCalculatorApplication.checkForCards(order, method, strategyResult)) {
+                    continue;
+                }
             }
             
             for (PaymentMethod method : paymentMethods) {
-                if (DiscountCalculatorApplication.checkForPointsPartialValue(order, method, strategyResult)) continue;
+                if (DiscountCalculatorApplication.checkForPointsPartialValueAlt(order, method, strategyResult)) {
+                    continue;
+                }
             }
         }
     }

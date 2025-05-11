@@ -64,7 +64,7 @@ public class StrategyDiscountMethodsRatio implements Strategy {
     orders.sort(Comparator.comparing(Order::getValue).reversed());
     for (Order order : orders) { 
         for (PaymentMethod method : paymentMethods) {
-                if (DiscountCalculatorApplication.checkForPointsPartialValue(order, method, strategyResult)) continue;
+                if (DiscountCalculatorApplication.checkForPointsPartialValueAlt(order, method, strategyResult)) continue;
             }
         }    
     }
