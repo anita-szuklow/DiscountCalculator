@@ -1,7 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package com.mycompany.discountcalculator.strategies;
 
 import com.mycompany.discountcalculator.Combination;
@@ -42,7 +39,7 @@ public class StrategyPointsFirstOrdersAscendingByMethodsAllowValuesDescending im
             }
             
             for (PaymentMethod method : paymentMethods) {
-                if (DiscountCalculatorApplication.checkForPointsPartialValue(order, method, strategyResult)) break;
+                if (DiscountCalculatorApplication.checkForPointsPartialValueAlt(order, method, strategyResult)) continue;
             }
         }
     }

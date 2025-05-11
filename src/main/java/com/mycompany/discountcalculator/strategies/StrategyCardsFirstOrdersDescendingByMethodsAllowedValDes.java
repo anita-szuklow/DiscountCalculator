@@ -37,7 +37,7 @@ public class StrategyCardsFirstOrdersDescendingByMethodsAllowedValDes  implement
             }
             
             for (PaymentMethod method : paymentMethods) {
-                if (DiscountCalculatorApplication.checkForPointsPartialValue(order, method, strategyResult)) break;
+                if (DiscountCalculatorApplication.checkForPointsPartialValueAlt(order, method, strategyResult)) continue;
             }
         }
     }

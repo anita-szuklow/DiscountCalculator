@@ -93,16 +93,19 @@ public class DiscountTest {
 
     // ----------- Test checkForPointsPartialValue ------------
 
-    static Stream<ArgumentsFull> pointsPartialCases() {
+    static Stream<ArgumentsFull> pointsPartialAltCases() {
         return Stream.of(
-                new ArgumentsFull("10000", "3000", 10, true, "6000", "0", "1000"),
-                new ArgumentsFull("8000", "1000", 10, true, "6200", "0", "800")
+            // orderValue, methodLimit, discountPercent, expectedResult, expectedOrder, expectedLimit, expectedDiscount
+            new ArgumentsFull("10000", "2000", 15, true,  "8000", "1000", "1000"),
+            new ArgumentsFull("5000",  "300",  15, false, "5000", "300",  "0"),
+            new ArgumentsFull("0",     "1000", 15, false, "0",    "1000","0"),
+            new ArgumentsFull("5000",  "500",  15, true,  "4000", "0",    "500")
         );
     }
 
     @ParameterizedTest
-    @MethodSource("pointsPartialCases")
-    void testCheckForPointsPartialValue(ArgumentsFull args) {
+    @MethodSource("pointsPartialAltCases")
+    void testCheckForPointsPartialValueAlt(ArgumentsFull args) {
         Order order = new Order();
         order.value = new BigInteger(args.orderValue);
         order.promotions = List.of("PUNKTY");
@@ -114,7 +117,7 @@ public class DiscountTest {
 
         Combination combo = new Combination(BigInteger.ZERO);
 
-        boolean result = DiscountCalculatorApplication.checkForPointsPartialValue(order, method, combo);
+        boolean result = DiscountCalculatorApplication.checkForPointsPartialValueAlt(order, method, combo);
 
         assertEquals(args.expectedResult, result);
         assertEquals(new BigInteger(args.expectedOrder), order.value);

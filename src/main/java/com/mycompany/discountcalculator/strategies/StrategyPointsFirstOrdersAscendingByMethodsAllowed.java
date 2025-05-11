@@ -34,7 +34,7 @@ public class StrategyPointsFirstOrdersAscendingByMethodsAllowed implements Strat
             }
             
             for (PaymentMethod method : paymentMethods) {
-                if (DiscountCalculatorApplication.checkForPointsPartialValue(order, method, strategyResult)) break;
+                if (DiscountCalculatorApplication.checkForPointsPartialValueAlt(order, method, strategyResult)) continue;
             }
         }
     }
