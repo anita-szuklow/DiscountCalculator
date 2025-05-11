@@ -116,24 +116,6 @@ public class DiscountCalculatorApplication {
                 }
                 return true;
     }
-    // zrezygnowalam z tej metody na rzecz kolejnej z dopiskiem Alt
-//    public static boolean checkForPointsPartialValue(Order order, PaymentMethod paymentMethod, Combination tryCombination){
-//        if (!paymentMethod.id.equals("PUNKTY")
-//                        || (order.value.divide(BigInteger.valueOf(10)).compareTo(paymentMethod.limit)>=0)
-//                        || order.value.equals(BigInteger.ZERO))
-//            return false;
-//        if (paymentMethod.id.equals("PUNKTY") && (order.value.compareTo(paymentMethod.limit) > 0)
-//                        && (order.value.divide(BigInteger.valueOf(10)).compareTo(paymentMethod.limit)<=0)
-//                        && !order.value.equals(BigInteger.ZERO)){
-//                    BigInteger discount = order.value.divide(BigInteger.valueOf(10));                    
-//                    tryCombination.totalDiscount = tryCombination.totalDiscount.add(discount);
-//                    tryCombination.addPaymentToMethod(paymentMethod.id, paymentMethod.limit);
-//                    order.value = order.value.subtract(discount);
-//                    order.value = order.value.subtract(paymentMethod.limit);
-//                    paymentMethod.limit = BigInteger.ZERO;       
-//                }
-//        return true;
-//    }
     public static boolean checkForPointsPartialValueAlt(Order order, PaymentMethod paymentMethod, Combination tryCombination){
         if (!paymentMethod.id.equals("PUNKTY")
                         || (order.value.divide(BigInteger.valueOf(10)).compareTo(paymentMethod.limit)> 0)
